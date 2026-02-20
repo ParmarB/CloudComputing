@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: filter-reading-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: filter-reading
+  template:
+    metadata:
+      labels:
+        app: filter-reading
+    spec:
+      containers:
+        - name: filter-reading
+          image: $REPO/filter-reading:latest
+          env:
+            - name: GCP_PROJECT
+              value: $PROJECT
+            - name: TOPIC_NAME
+              value: meter-data
+            - name: SUBSCRIPTION_ID
+              value: filter-sub
+            - name: NEXT_FUNCTION_TAG
+              value: convert
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: ./friendly-block-487018-u3-f5736a16c0c2.json
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: convert-reading-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: convert-reading
+  template:
+    metadata:
+      labels:
+        app: convert-reading
+    spec:
+      containers:
+        - name: convert-reading
+          image: $REPO/convert-reading:latest
+          env:
+            - name: GCP_PROJECT
+              value: $PROJECT
+            - name: TOPIC_NAME
+              value: meter-data
+            - name: SUBSCRIPTION_ID
+              value: convert-sub
+            - name: NEXT_FUNCTION_TAG
+              value: store
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: ./friendly-block-487018-u3-f5736a16c0c2.json
